@@ -1,0 +1,14 @@
+{
+  "name": "s3p-signature",
+  "version": "1.0.0",
+  "description": "HMAC-SHA1 signature generator for Smobilpay S3P API",
+  "main": "lib/s3p-signature.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "author": "Maviance PLC",
+  "license": "MIT",
+  "devDependencies": {
+    "mocha": "^10.0.0"
+  }
+}
