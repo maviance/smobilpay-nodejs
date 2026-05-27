@@ -134,3 +134,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Smoke-test credentials — only the .example.json is committed.
+smoke-test.json
+

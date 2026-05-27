@@ -1,14 +1,36 @@
 {
-  "name": "s3p-signature",
-  "version": "1.0.0",
-  "description": "HMAC-SHA1 signature generator for Smobilpay S3P API",
-  "main": "lib/s3p-signature.js",
-  "scripts": {
-    "test": "mocha"
+  "name": "@maviance/smobilpay-s3p-client",
+  "version": "3.0.0",
+  "description": "Node.js client for the Smobilpay S3P partner API (v3.x). OAuth 2.0 client_credentials authentication, full coverage of /v2 endpoints, zero runtime dependencies.",
+  "keywords": [
+    "smobilpay",
+    "s3p",
+    "maviance",
+    "payments",
+    "africa",
+    "mobile-money"
+  ],
+  "homepage": "https://github.com/maviance/smobilpay-s3p-client-nodejs",
+  "bugs": {
+    "url": "https://github.com/maviance/smobilpay-s3p-client-nodejs/issues"
   },
-  "author": "Maviance PLC",
   "license": "MIT",
-  "devDependencies": {
-    "mocha": "^10.0.0"
-  }
+  "author": "Maviance PLC",
+  "main": "src/index.js",
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "test": "node --test test/unit",
+    "test:integration": "node --test test/integration",
+    "test:coverage": "node --test --experimental-test-coverage test/unit",
+    "smoke": "node samples/smoke-test.js"
+  },
+  "dependencies": {},
+  "devDependencies": {}
 }
