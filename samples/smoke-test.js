@@ -335,7 +335,7 @@ async function runScenarios(runner, client, cfg) {
     const fmt = (d) => d.toISOString().slice(0, 10);
     runner.detail(`range:        ${fmt(weekAgo)} -> ${fmt(today)}`);
     runner.detail(`transactions: ${rows.length}`);
-    const sample = Math.min(3, rows.length);
+    const sample = Math.min(30, rows.length);
     for (let i = 0; i < sample; i++) {
       const s = rows[i];
       runner.detail(`  - ${s.ptn} : ${s.status}, ${s.priceLocalCur} ${s.localCur}, trid=${s.trid}`);
