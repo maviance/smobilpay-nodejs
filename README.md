@@ -4,17 +4,14 @@ Node.js client for the **Smobilpay S3P partner API (v3.x)**. Authenticates
 with OAuth 2.0 `client_credentials`, covers every `/v2/*` endpoint from
 the partner specification, and ships with zero runtime dependencies.
 
-Mirrors the Java and Go clients line-for-line so cross-language smoke
-tests produce equivalent results against the same partner environment.
-
 ## Requirements
 
 - Node.js **18 or later** (uses the built-in `fetch`, `node:test`, and `AbortController`).
 - Partner credentials (`publicKey` / `secretKey`) and an issued `baseUrl`.
 
-Credentials and the base URL are provisioned by Maviance support during
-partner onboarding. The same credentials are accepted across the
-acceptance and production environments — only the URL changes.
+Credentials and the base URL are provisioned during partner onboarding.
+The same credentials are accepted across the acceptance and production
+environments — only the URL changes.
 
 ## Install
 
@@ -31,7 +28,7 @@ const {
 } = require('@maviance/smobilpay-s3p-client');
 
 const client = createClient({
-  baseUrl: process.env.SMOBILPAY_BASE_URL,        // e.g. https://s3p.smobilpay.acceptance.maviance.info
+  baseUrl: process.env.SMOBILPAY_BASE_URL,        // e.g. https://api.acceptance.example.invalid
   publicKey: process.env.SMOBILPAY_PUBLIC_KEY,
   secretKey: process.env.SMOBILPAY_SECRET_KEY,
 });
@@ -61,7 +58,7 @@ token mint).
 This client supports **OAuth 2.0 `client_credentials` only**. HMAC-SHA1
 signing (used by the legacy `2.x` clients) is deliberately not
 implemented — partners migrating from the legacy auth scheme must be
-provisioned with OAuth credentials by Maviance.
+provisioned with OAuth credentials.
 
 On the first authenticated request the client:
 
@@ -88,7 +85,7 @@ exception carries `httpStatus` and the OAuth standard `error` identifier
 
 ```js
 createClient({
-  baseUrl: 'https://s3p.smobilpay.acceptance.maviance.info',  // required
+  baseUrl: 'https://api.acceptance.example.invalid',  // required
   publicKey: '…',                                              // required
   secretKey: '…',                                              // required
   apiVersion: '3.0.0',                                         // default '3.0.0'
@@ -176,11 +173,10 @@ client.confirm.collect({
 | `validateAccount(destination, serviceId)` | `GET /v2/validate` | Validate an MSISDN/contract; returns a `CustomerAccount` envelope |
 
 > `GET /v2/validate` is a **restricted endpoint**. Access is granted
-> only to partners who have cleared Maviance's internal validation and
-> compliance review (KYC / data-protection obligations apply to the
-> returned customer name). Unauthorised callers receive HTTP 401 — the
-> client surfaces this as a `SmobilpayApiException` with
-> `httpStatus === 401`.
+> only to partners who have completed the provider's compliance review
+> (KYC / data-protection obligations apply to the returned customer
+> name). Unauthorised callers receive HTTP 401 — the client surfaces
+> this as a `SmobilpayApiException` with `httpStatus === 401`.
 
 ## Error handling
 
@@ -222,7 +218,7 @@ try {
 
 Match on `respCode` for programmatic handling — it is the canonical
 machine identifier defined by the partner spec. The full error catalogue
-is provided during partner onboarding.
+is published with the partner specification.
 
 ## Date handling
 
@@ -230,8 +226,8 @@ is provided during partner onboarding.
 ISO-8601 strings, including the bare `"YYYY-MM-DD"` form (treated as the
 start of that UTC day). The client serialises the request as
 `timestamp_from=YYYY-MM-DDT00:00:00+00:00` and
-`timestamp_to=YYYY-MM-DDT23:59:59+00:00`, matching the wire format used
-by the Java and Go clients.
+`timestamp_to=YYYY-MM-DDT23:59:59+00:00`, matching the wire format
+required by the partner spec.
 
 ## Smoke test
 
@@ -301,11 +297,7 @@ and polls `/v2/verifytx` once.
 
 > **WARNING:** This is the only path in the smoke test that moves money.
 > Acceptance transactions are not reversible from the client — if you
-> collect by mistake, contact your Maviance integration manager.
-
-The JSON config is **identical** to the Java client's
-`smoke-test.example.json`, so the same file can drive the Java, Go, PHP,
-and Node.js harnesses for direct cross-language comparison.
+> collect by mistake, contact your partner support representative.
 
 Exit code: `0` on full pass, `1` if any scenario failed, `2` on a config
 error before the client could start.
@@ -318,22 +310,6 @@ npm test          # unit suite, hermetic, zero network
 
 All tests use the built-in `node:test` runner. No external dependencies
 are required.
-
-## Comparison with the other language clients
-
-This package is one of several official client implementations:
-
-| Language | Repo / path |
-| --- | --- |
-| Java | `s3p-clients/java` (reference implementation) |
-| Node.js | this package |
-| Go | `s3p-clients/go` |
-| PHP | `s3p-clients/php` |
-| Dart | `s3p-clients/dart` |
-| Python | `s3p-clients/python` |
-
-All clients accept the same `smoke-test.json` configuration and produce
-the same report format.
 
 ## License
 

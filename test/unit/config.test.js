@@ -11,7 +11,7 @@ const {
 } = require('../../src/config');
 
 const VALID = Object.freeze({
-  baseUrl: 'https://s3p.smobilpay.acceptance.maviance.info',
+  baseUrl: 'https://api.acceptance.example.invalid',
   publicKey: 'pk_test',
   secretKey: 'sk_test',
 });

@@ -58,7 +58,7 @@ class SmobilpayApiException extends SmobilpayError {
     this.rawBody = rawBody;
   }
 
-  /** Short-hand accessor matching the Java client. */
+  /** Short-hand accessor for `apiError?.respCode`. */
   get respCode() {
     return this.apiError ? this.apiError.respCode : null;
   }

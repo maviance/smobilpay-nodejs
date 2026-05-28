@@ -40,11 +40,11 @@ function createAccountValidationApi(transport) {
      * against the provider.
      *
      * **Restricted endpoint.** Access is granted only to partners who
-     * have cleared Maviance's internal validation and compliance review
-     * (KYC / data-protection obligations apply to the returned customer
-     * name). Unauthorized callers receive HTTP 401 as a
-     * {@link SmobilpayApiException}. Contact your integration manager to
-     * request enablement.
+     * have completed the provider's compliance review (KYC /
+     * data-protection obligations apply to the returned customer name).
+     * Unauthorized callers receive HTTP 401 as a
+     * {@link SmobilpayApiException}. Contact your partner support
+     * representative to request enablement.
      *
      * @param {string} destination MSISDN or contract number to validate.
      * @param {number} serviceId   Note: camelCase per the partner spec — distinct from `serviceid` elsewhere.

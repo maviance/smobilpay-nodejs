@@ -17,7 +17,7 @@ const { createAccountValidationApi } = require('./api/account-validation');
  * caches it until expiry. Pick an API group via the accessor properties:
  *
  *     const client = createClient({
- *       baseUrl: 'https://s3p.smobilpay.acceptance.maviance.info',
+ *       baseUrl: 'https://api.acceptance.example.invalid',
  *       publicKey: process.env.SMOBILPAY_PUBLIC_KEY,
  *       secretKey: process.env.SMOBILPAY_SECRET_KEY,
  *     });

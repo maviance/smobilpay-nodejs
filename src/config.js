@@ -6,7 +6,7 @@
  * Holds the partner base URL, OAuth 2.0 client credentials
  * (`publicKey` / `secretKey`), the `x-api-version` header value, and
  * per-request timeouts. The base URL, credentials, and callback
- * registration are issued by Maviance support during partner onboarding.
+ * registration are provisioned during partner onboarding.
  *
  * Construct via {@link createConfig} — the function validates required
  * fields, normalises the base URL (no trailing slash), and freezes the
@@ -28,9 +28,9 @@ const DEFAULT_TOKEN_REFRESH_SKEW_MS = 30_000;
 
 /**
  * @typedef {Object} SmobilpayConfig
- * @property {string} baseUrl                   Partner API base URL, e.g. `https://s3p.smobilpay.acceptance.maviance.info` (no trailing slash).
- * @property {string} publicKey                 OAuth 2.0 client_id issued by Maviance.
- * @property {string} secretKey                 OAuth 2.0 client_secret issued by Maviance.
+ * @property {string} baseUrl                   Partner API base URL, e.g. `https://api.acceptance.example.invalid` (no trailing slash).
+ * @property {string} publicKey                 OAuth 2.0 client_id issued at partner onboarding.
+ * @property {string} secretKey                 OAuth 2.0 client_secret issued at partner onboarding.
  * @property {string} apiVersion                Value sent as the `x-api-version` header. Defaults to `"3.0.0"`.
  * @property {number} requestTimeoutMs          Per-request timeout in milliseconds.
  * @property {number} tokenRefreshSkewMs        Refresh-ahead window for cached OAuth tokens, in milliseconds.

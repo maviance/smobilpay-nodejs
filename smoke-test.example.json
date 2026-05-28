@@ -1,14 +1,14 @@
 {
-  "_comment": "Acceptance-environment test data sourced from https://maviance.atlassian.net/wiki/spaces/SCG/pages/5161287683 . Spec terminology: cashout = collection (money OUT of customer wallet), cashin = disbursement (money INTO recipient wallet). Copy this file to smoke-test.json and fill in baseUrl, publicKey, secretKey. Set any block to null (or remove it) to skip the corresponding scenario.",
+  "_comment": "Sample acceptance-environment test data. Spec terminology: cashout = collection (money OUT of customer wallet), cashin = disbursement (money INTO recipient wallet). Copy this file to smoke-test.json and fill in baseUrl, publicKey, secretKey. Set any block to null (or remove it) to skip the corresponding scenario.",
 
   "_collect_comment": "By default every collection scenario stops at the quote — the harness never calls /v2/collectstd. To exercise a real collect on a given flow, add the following keys to that block: \"collect\": true, \"customerPhonenumber\": \"<payer/recipient MSISDN>\", \"customerEmailaddress\": \"<receipt email>\". For services with isReqServiceNumber=true (e.g. CMMTNMOMO Cash-In), also set \"serviceNumber\". Other optional pass-through fields: customerName, customerAddress, customerNumber, trid (auto-generated otherwise), tag, callbackUrl, cdata. WARNING: opting in moves real money on the partner balance.",
   "_collect_example": {
-    "_comment": "Worked example — copy these keys into the cashin block to disburse 1000 XAF to MSISDN 699999999 via CMORANGEMOMO. Tested 2026-05-27.",
+    "_comment": "Worked example — copy these keys into the cashin block to disburse 1000 XAF to MSISDN 699999999 via CMORANGEMOMO.",
     "serviceId": 50052,
     "amount": 1000,
     "collect": true,
     "customerPhonenumber": "699999999",
-    "customerEmailaddress": "acceptance@maviance.test",
+    "customerEmailaddress": "acceptance@example.com",
     "serviceNumber": "699999999"
   },
 
@@ -18,34 +18,34 @@
   "apiVersion": "3.0.0",
 
   "cashout": {
-    "_comment": "Collection — money flows OUT of customer wallet. Source row 20: CMMTNMOMO Cash-Out / Depot, serviceId 20053, MSISDN 677389120.",
+    "_comment": "Collection — money flows OUT of customer wallet. Sample: CMMTNMOMO Cash-Out / Depot, serviceId 20053, MSISDN 677389120.",
     "serviceId": 20053,
     "amount": 500
   },
 
   "bill": {
-    "_comment": "SEARCHABLE_BILL. Source row 6: ENEO postpaid contract 203157530. Other options: row 5 CAMWATER (990007 / 010178181220101), row 7 CMDGI (202302 / 43011666543), row 8 CMDOUANES (202303 / CMDP32023GEN017240I).",
+    "_comment": "SEARCHABLE_BILL. Sample: ENEO postpaid contract 203157530. Other options to try: CAMWATER (serviceId 990007 / 010178181220101), CMDGI (202302 / 43011666543), CMDOUANES (202303 / CMDP32023GEN017240I).",
     "merchant": "ENEO",
     "serviceId": 10039,
     "serviceNumber": "203157530"
   },
 
   "topup": {
-    "_comment": "TOPUP airtime. Source row 12: CMMTN serviceId 20051, MSISDN 677389120. Other options: row 13 CMORANGE (20062 / 697707102), row 9 CMCamtel (20101 / 242349577).",
+    "_comment": "TOPUP airtime. Sample: CMMTN serviceId 20051, MSISDN 677389120. Other options: CMORANGE (20062 / 697707102), CMCamtel (20101 / 242349577).",
     "serviceId": 20051,
     "amount": 500
   },
 
   "voucher": null,
-  "_voucher_comment": "Acceptance lists only one VOUCHER-type service and the page does not name its serviceId. After running once, find the VOUCHER service in the smoke-test's 'Service catalog' output (line: '- VOUCHER: N') by inspecting client.masterdata().services() entries with type=VOUCHER, then replace the null above with { \"serviceId\": <that id> }.",
+  "_voucher_comment": "If the partner environment exposes a VOUCHER-type service without a published serviceId, run the smoke test once and look up the VOUCHER entry in the 'Service catalog' output (line: '- VOUCHER: N') by inspecting client.masterdata().services() entries with type=VOUCHER, then replace the null above with { \"serviceId\": <that id> }.",
 
   "product": {
-    "_comment": "PRODUCT. Source row 1: CanalPlus Canal+ decoder serviceId 90006. Other options: row 2 CMStarTimes (20021), row 3 NGDSTV (202301), row 4 CMEASYTV (91006).",
+    "_comment": "PRODUCT. Sample: CanalPlus Canal+ decoder serviceId 90006. Other options: CMStarTimes (20021), NGDSTV (202301), CMEASYTV (91006).",
     "serviceId": 90006
   },
 
   "subscription": {
-    "_comment": "SUBSCRIPTION. Source row 23: CMSABC SABC Subscription serviceId 5000. Try sample 0000000101 first; if 'no subscriptions for…' fall back to alt sample 00000108, or to row 24 (serviceId 10041, ref 357-1029517-8 — merchant code not in the Confluence page so check services() output for it).",
+    "_comment": "SUBSCRIPTION. Sample: CMSABC SABC Subscription serviceId 5000. Try serviceNumber 0000000101 first; if 'no subscriptions for…' fall back to 00000108, or to serviceId 10041 / ref 357-1029517-8 (look up that service's merchant via services()).",
     "merchant": "CMSABC",
     "serviceId": 5000,
     "serviceNumber": "0000000101",
@@ -53,20 +53,20 @@
   },
 
   "cashin": {
-    "_comment": "Disbursement — money flows INTO recipient wallet. Source row 19: CMMTNMOMO Cash-In / Retrait, serviceId 20052, MSISDN 677389120. Other options: row 17 CMORANGEOM Cash-In (30052 / 697707102), row 21 CMYOOMEEMONEY Cashin (100237 / 242254751).",
+    "_comment": "Disbursement — money flows INTO recipient wallet. Sample: CMMTNMOMO Cash-In / Retrait, serviceId 20052, MSISDN 677389120. Other options: CMORANGEOM Cash-In (30052 / 697707102), CMYOOMEEMONEY Cashin (100237 / 242254751).",
     "serviceId": 20052,
     "amount": 1000
   },
 
   "verify": {
-    "_comment": "Pre-payment serviceNumber validation. Source row 6: ENEO postpaid contract 203157530 (verifiable contract).",
+    "_comment": "Pre-payment serviceNumber validation. Sample: ENEO postpaid contract 203157530 (verifiable contract).",
     "merchant": "ENEO",
     "serviceId": 10039,
     "serviceNumber": "203157530"
   },
 
   "validate": {
-    "_comment": "Account validation via GET /v2/validate — returns a CustomerAccount {status, name, destination}. Status: UNKNOWN | VALIDATED (syntax only) | VERIFIED (cross-checked with provider). Sample: MTN MoMo MSISDN 677389120 against the cashout service 20053 (row 20). Swap destination/serviceId for the account you want to validate.",
+    "_comment": "Account validation via GET /v2/validate — returns a CustomerAccount {status, name, destination}. Status: UNKNOWN | VALIDATED (syntax only) | VERIFIED (cross-checked with provider). Sample: MTN MoMo MSISDN 677389120 against the cashout service 20053. Swap destination/serviceId for the account you want to validate.",
     "destination": "677389120",
     "serviceId": 20053
   }

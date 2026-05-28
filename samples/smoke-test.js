@@ -328,7 +328,7 @@ async function runScenarios(runner, client, cfg) {
     } catch (e) {
       if (e instanceof SmobilpayApiException && e.httpStatus === 401) {
         throw new SkipError(
-          'GET /v2/validate is a restricted endpoint and is not enabled for this partner (HTTP 401). Compliance review is required — contact your Maviance integration manager.',
+          'GET /v2/validate is a restricted endpoint and is not enabled for this partner (HTTP 401). Compliance review is required — contact your partner support representative.',
         );
       }
       throw e;
@@ -496,7 +496,7 @@ async function quoteAndReport(runner, client, item, amount, c) {
  *
  * WARNING: this moves real money on the partner balance. Acceptance
  * transactions are not reversible from the client; if you collect by
- * mistake, contact your Maviance integration manager.
+ * mistake, contact your partner support representative.
  */
 async function collectAndReport(runner, client, quote, c) {
   expect(

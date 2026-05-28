@@ -1,9 +1,9 @@
 'use strict';
 
 /**
- * Date helpers used by the history endpoints. Mirrors the Java client's
- * `LenientLocalDateDeserializer` + ISO offset formatter so the wire format
- * (`timestamp_from` / `timestamp_to`) is identical across language ports.
+ * Date helpers used by the history endpoints. Produces the ISO-8601 offset
+ * wire format (`timestamp_from` / `timestamp_to`) required by the partner
+ * spec for `/v2/historystd` date-range queries.
  */
 
 /**
@@ -32,8 +32,7 @@ function endOfUtcDay(input) {
 
 /**
  * Format a `Date` as an ISO-8601 offset datetime with an explicit `+00:00`
- * offset (matching the Java `DateTimeFormatter.ISO_OFFSET_DATE_TIME`
- * output the Smobilpay server accepts on `historystd`).
+ * offset — the wire format the Smobilpay server accepts on `historystd`.
  *
  * @param {Date} d
  * @returns {string} e.g. `2026-05-27T00:00:00+00:00`
