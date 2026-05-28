@@ -135,6 +135,7 @@ async function runScenarios(runner, client, cfg) {
     runner.detail(`server version: ${pong.version}`);
     runner.detail(`nonce echo:     ${pong.nonce}`);
     runner.detail(`public key:     ${pong.key}`);
+    dumpObject(runner, 'raw response', pong);
   });
 
   await runner.run('OAuth 2.0 token refresh', async () => {
@@ -146,6 +147,7 @@ async function runScenarios(runner, client, cfg) {
     runner.detail(`first  bearer prefix: ${first.slice(0, 12)}...`);
     runner.detail(`forced bearer prefix: ${forced.slice(0, 12)}...`);
     runner.detail(`identical: ${first === forced}`);
+    dumpObject(runner, 'ping after refresh', pong);
   });
 
   await runner.run('Account profile', async () => {
@@ -156,6 +158,7 @@ async function runScenarios(runner, client, cfg) {
     runner.detail(`balance:         ${account.balance} ${account.currency}`);
     runner.detail(`daily limit max: ${account.limitMax}`);
     runner.detail(`limit remaining: ${account.limitRemaining}`);
+    dumpObject(runner, 'raw response', account);
   });
 
   await runner.run('Merchant catalog', async () => {
@@ -170,6 +173,7 @@ async function runScenarios(runner, client, cfg) {
     if (merchants.length > sample) {
       runner.detail(`  ...and ${merchants.length - sample} more`);
     }
+    dumpSample(runner, 'first merchants (all fields)', merchants, sample);
   });
 
   await runner.run('Service catalog', async () => {
@@ -186,6 +190,7 @@ async function runScenarios(runner, client, cfg) {
     listServicesOfType(runner, services, 'VOUCHER', 'VOUCHER services');
     listServicesOfType(runner, services, 'SUBSCRIPTION', 'SUBSCRIPTION services');
     listVerifiableServices(runner, services);
+    dumpSample(runner, 'first services (all fields)', services, Math.min(3, services.length));
   });
 
   await runner.run('Collection — cash-out (discover + quote)', async () => {
@@ -210,6 +215,7 @@ async function runScenarios(runner, client, cfg) {
     runner.detail(
       `picked: ${bill.payItemId} (${bill.billType}, amount=${bill.amountLocalCur} ${bill.localCur}, due=${bill.billDueDate})`,
     );
+    dumpObject(runner, 'picked bill (all fields)', bill);
     await quoteAndReport(runner, client, bill, Math.trunc(bill.amountLocalCur), c);
   });
 
@@ -273,6 +279,7 @@ async function runScenarios(runner, client, cfg) {
     runner.detail(
       `picked: ${sub.payItemId} (${sub.name}, customer=${sub.customerName}, amount=${sub.amountLocalCur} ${sub.localCur}, due=${sub.dueDate})`,
     );
+    dumpObject(runner, 'picked subscription (all fields)', sub);
     await quoteAndReport(runner, client, sub, resolveAmount(sub, c.amount), c);
   });
 
@@ -317,6 +324,7 @@ async function runScenarios(runner, client, cfg) {
       runner.detail(`destination: ${account.destination}`);
       runner.detail(`status:      ${account.status}`);
       runner.detail(`name:        ${account.name}`);
+      dumpObject(runner, 'raw response', account);
     } catch (e) {
       if (e instanceof SmobilpayApiException && e.httpStatus === 401) {
         throw new SkipError(
@@ -340,6 +348,7 @@ async function runScenarios(runner, client, cfg) {
       const s = rows[i];
       runner.detail(`  - ${s.ptn} : ${s.status}, ${s.priceLocalCur} ${s.localCur}, trid=${s.trid}`);
     }
+    dumpSample(runner, 'first transactions (all fields)', rows, Math.min(3, rows.length));
   });
 }
 
@@ -409,6 +418,32 @@ function describeItem(runner, item) {
   runner.detail(
     `picked: ${item.payItemId} (${item.name}, ${item.amountType}, local=${item.amountLocalCur} ${item.localCur})`,
   );
+  dumpObject(runner, 'picked item (all fields)', item);
+}
+
+function dumpObject(runner, label, obj) {
+  if (obj == null) {
+    runner.detail(`${label}: ${obj}`);
+    return;
+  }
+  runner.detail(`${label}:`);
+  const json = JSON.stringify(obj, null, 2);
+  for (const line of json.split('\n')) {
+    runner.detail(`  ${line}`);
+  }
+}
+
+function dumpSample(runner, label, arr, n) {
+  if (!Array.isArray(arr) || arr.length === 0 || n <= 0) return;
+  runner.detail(`${label}:`);
+  const take = Math.min(n, arr.length);
+  for (let i = 0; i < take; i++) {
+    const json = JSON.stringify(arr[i], null, 2);
+    runner.detail(`  [${i}]`);
+    for (const line of json.split('\n')) {
+      runner.detail(`    ${line}`);
+    }
+  }
 }
 
 function listServicesOfType(runner, services, type, label) {
@@ -437,6 +472,7 @@ async function quoteAndReport(runner, client, item, amount, c) {
   runner.detail(`price (local):  ${quote.priceLocalCur} ${quote.localCur}`);
   runner.detail(`price (system): ${quote.priceSystemCur} ${quote.systemCur}`);
   runner.detail(`promotion:      ${quote.promotion}`);
+  dumpObject(runner, 'quote response (all fields)', quote);
 
   if (c && c.collect === true) {
     await collectAndReport(runner, client, quote, c);
@@ -505,6 +541,7 @@ async function collectAndReport(runner, client, quote, c) {
   runner.detail(`price (system):  ${response.priceSystemCur} ${response.systemCur}`);
   runner.detail(`timestamp:       ${response.timestamp}`);
   if (response.pin) runner.detail(`pin:             ${response.pin}`);
+  dumpObject(runner, 'collect response (all fields)', response);
 
   // Brief poll so the server has a moment to settle before we re-check.
   await sleep(2000);
@@ -512,6 +549,7 @@ async function collectAndReport(runner, client, quote, c) {
   if (verifications && verifications.length > 0) {
     const v = verifications[0];
     runner.detail(`verifytx:        status=${v.status} clearingDate=${v.clearingDate}`);
+    dumpSample(runner, 'verifytx response (all fields)', verifications, verifications.length);
   } else {
     runner.detail('verifytx:        no rows yet (final status will land via callbackUrl or a later poll)');
   }
