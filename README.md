@@ -17,6 +17,10 @@ environments — only the URL changes.
 
 ```bash
 npm install @maviance/smobilpay-s3p-client
+# or
+yarn add @maviance/smobilpay-s3p-client
+# or
+pnpm add @maviance/smobilpay-s3p-client
 ```
 
 ## Quick start
@@ -59,6 +63,11 @@ This client supports **OAuth 2.0 `client_credentials` only**. HMAC-SHA1
 signing (used by the legacy `2.x` clients) is deliberately not
 implemented — partners migrating from the legacy auth scheme must be
 provisioned with OAuth credentials.
+
+> **Still on HMAC?** Stay on the prior major of this client until you are
+> issued OAuth credentials — install `@maviance/smobilpay-s3p-client@^2`
+> (`npm install @maviance/smobilpay-s3p-client@^2`). The `2.x` line keeps
+> HMAC-SHA1 signing for legacy partners; `3.x` is OAuth-only.
 
 On the first authenticated request the client:
 
