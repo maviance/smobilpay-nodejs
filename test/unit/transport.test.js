@@ -140,3 +140,64 @@ test('post without body sends no body field', async () => {
   await transport.post('/v2/somepath');
   assert.equal(fetchImpl.lastCall().init.body, undefined);
 });
+
+// --- reactive 401 refresh + retry (MPAY-30042) ---
+
+function makeRetrySetup() {
+  const fetchImpl = createMockFetch();
+  const cfg = createConfig({
+    baseUrl: 'https://api.example.invalid',
+    publicKey: 'pk',
+    secretKey: 'sk',
+    apiVersion: '3.2.0',
+    fetch: fetchImpl,
+  });
+  let refreshed = 0;
+  const tokenManager = {
+    accessToken: async () => 'bearer-stale',
+    refresh: async () => {
+      refreshed += 1;
+      return 'bearer-fresh';
+    },
+  };
+  return { fetchImpl, transport: createTransport(cfg, tokenManager), refreshCount: () => refreshed };
+}
+
+test('get refreshes token and retries once on 401, then succeeds', async () => {
+  const { fetchImpl, transport, refreshCount } = makeRetrySetup();
+  fetchImpl.queueText(401, '');
+  fetchImpl.queueJson(200, { version: '3.0.0' });
+  const result = await transport.get('/v2/ping');
+  assert.deepEqual(result, { version: '3.0.0' });
+  assert.equal(fetchImpl.calls.length, 2);
+  assert.equal(fetchImpl.calls[0].init.headers.Authorization, 'Bearer bearer-stale');
+  assert.equal(fetchImpl.calls[1].init.headers.Authorization, 'Bearer bearer-fresh');
+  assert.equal(refreshCount(), 1);
+});
+
+test('get retries at most once — persistent 401 surfaces SmobilpayApiException', async () => {
+  const { fetchImpl, transport, refreshCount } = makeRetrySetup();
+  fetchImpl.queueText(401, '');
+  fetchImpl.queueJson(401, { respCode: 41004, devMsg: 'unauthorized' });
+  await assert.rejects(() => transport.get('/v2/ping'), (err) => {
+    assert.ok(err instanceof SmobilpayApiException);
+    assert.equal(err.httpStatus, 401);
+    return true;
+  });
+  assert.equal(fetchImpl.calls.length, 2);
+  assert.equal(refreshCount(), 1);
+});
+
+test('post retries on 401 with the refreshed bearer and resent body', async () => {
+  const { fetchImpl, transport } = makeRetrySetup();
+  fetchImpl.queueText(401, '');
+  fetchImpl.queueJson(200, { quoteId: 'abc' });
+  const body = { amount: 500, payItemId: 'PI' };
+  const result = await transport.post('/v2/quotestd', body);
+  assert.deepEqual(result, { quoteId: 'abc' });
+  assert.equal(fetchImpl.calls.length, 2);
+  const retry = fetchImpl.calls[1];
+  assert.equal(retry.init.headers.Authorization, 'Bearer bearer-fresh');
+  assert.equal(retry.init.headers['Content-Type'], 'application/json');
+  assert.equal(retry.init.body, JSON.stringify(body));
+});

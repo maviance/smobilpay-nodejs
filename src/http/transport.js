@@ -39,23 +39,37 @@ function createTransport(config, tokenManager) {
 
   async function get(path, query) {
     const url = resolveUrl(config.baseUrl, path, query);
-    const headers = await authHeaders(tokenManager, config.apiVersion);
-    const response = await dispatch(fetchImpl, url, {
+    return send(url, (bearer) => ({
       method: 'GET',
-      headers,
-    }, config.requestTimeoutMs);
-    return parseResponse(response);
+      headers: baseHeaders(bearer, config.apiVersion),
+    }));
   }
 
   async function post(path, body) {
     const url = resolveUrl(config.baseUrl, path, null);
-    const headers = await authHeaders(tokenManager, config.apiVersion);
-    headers['Content-Type'] = 'application/json';
-    const response = await dispatch(fetchImpl, url, {
+    const payload = body === undefined ? undefined : JSON.stringify(body);
+    return send(url, (bearer) => ({
       method: 'POST',
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    }, config.requestTimeoutMs);
+      headers: { ...baseHeaders(bearer, config.apiVersion), 'Content-Type': 'application/json' },
+      body: payload,
+    }));
+  }
+
+  /**
+   * Sends an authenticated request built by `makeInit(bearer)`, retrying once
+   * on a 401 after forcing a token refresh. `makeInit` is a factory because the
+   * retry must carry the refreshed bearer; the body is a plain string so it is
+   * safe to resend. A 401 is rejected at the auth layer before any business
+   * logic runs, so retrying is safe even for non-idempotent POSTs. Bounded to a
+   * single retry; a persistent 401 falls through to `parseResponse` and throws.
+   */
+  async function send(url, makeInit) {
+    let bearer = await tokenManager.accessToken();
+    let response = await dispatch(fetchImpl, url, makeInit(bearer), config.requestTimeoutMs);
+    if (response.status === 401) {
+      bearer = await tokenManager.refresh();
+      response = await dispatch(fetchImpl, url, makeInit(bearer), config.requestTimeoutMs);
+    }
     return parseResponse(response);
   }
 
@@ -70,8 +84,7 @@ function resolveUrl(baseUrl, path, query) {
     : `${baseUrl}${normalisedPath}`;
 }
 
-async function authHeaders(tokenManager, apiVersion) {
-  const bearer = await tokenManager.accessToken();
+function baseHeaders(bearer, apiVersion) {
   return {
     Authorization: `Bearer ${bearer}`,
     'x-api-version': apiVersion,

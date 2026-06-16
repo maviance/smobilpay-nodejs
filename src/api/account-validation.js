@@ -42,7 +42,9 @@ function createAccountValidationApi(transport) {
      * **Restricted endpoint.** Access is granted only to partners who
      * have completed the provider's compliance review (KYC /
      * data-protection obligations apply to the returned customer name).
-     * Unauthorized callers receive HTTP 401 as a
+     * Unauthorized callers receive HTTP 401; the client performs one automatic
+     * token refresh and retry on a 401, so when the cause is missing clearance
+     * the retry returns 401 again and surfaces as a
      * {@link SmobilpayApiException}. Contact your partner support
      * representative to request enablement.
      *
